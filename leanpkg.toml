@@ -1,0 +1,9 @@
+[package]
+name = "Distinguish_probability_distributions"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.43.0"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "ae5b6952ad7a79351d75d0115832ccfa71aa3a9b"}
+Shannon-theory = {git = "https://github.com/BassemSafieldeen/Shannon-theory", rev = "138f671d14f34fa5886c9b13b1a64cb1783efe07"}
