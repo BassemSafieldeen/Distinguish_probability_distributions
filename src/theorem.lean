@@ -1,4 +1,5 @@
-import basic
+import upper_bound_lemmas
+import lower_bound_lemmas
 
 import order.liminf_limsup
 
@@ -6,17 +7,11 @@ open real filter
 
 noncomputable theory
 
-variables {ι : Type}
-[fintype ι] [decidable_eq ι]
-(q q₁ q₂ : ι → ℝ) [rnd_var q] [rnd_var q₁] [rnd_var q₂]
-(n : ℕ)
-(r δ ε : ℝ) [r > 0] [δ > 0] [ε > 0]
-[achieves_err_exp q₁ q₂ ε q δ]
-(T : ℝ) [T = (err_exp q₁ q₂ r) - r] -- consider this partition
+variables {ι : Type} {n : ℕ}
+[fintype ι] [fintype (ℕ → ι)] [decidable_eq ι]
+(qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ₁] [rnd_var qₙ₂]
+(q₁ q₂ : ι → ℝ) [rnd_var_1 q₁] [rnd_var_1 q₂]
+(r T : ℝ) [r > 0] [T = (err_exp qₙ₁ qₙ₂ r) - r] -- consider this partition
 
-theorem lim_log_prob_of_α_error :
-lim at_top (λ n:ℕ, 1/n • log(α q₁ q₂ T)) = -err_exp q₁ q₂ r :=
-begin
-  -- the proof goes here
-  sorry,
-end
+-- theorem lim_log_prob_of_α_error_of_iid [iid n qₙ₁ q₁] [iid n qₙ₂ q₂] :
+-- lim at_top (λn:ℕ, 1/n • log(α qₙ₁ qₙ₂ T)) = - discrimination_1 q₁ q₂ := sorry
