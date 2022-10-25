@@ -16,7 +16,7 @@ def Uₙ (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) :=
 { kₙ | (qₙ₁ kₙ) ≥ (qₙ₂ kₙ) * exp T }
 
 /-- Uₙ indicator function: if kₙ ∈ Uₙ then 1 else 0 -/
-def Φ (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) (kₙ : ℕ → ι) : ℝ :=
+def Φₙ (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) (kₙ : ℕ → ι) : ℝ :=
 indicator (Uₙ qₙ₁ qₙ₂ T) 1 kₙ
 
 /--  Prob. of error: guess qₙ₁ when actually qₙ₂ -/
@@ -24,7 +24,7 @@ def αₙ (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) : ℝ :=
 ∑ kₙ, (qₙ₂ kₙ) * (Φ qₙ₁ qₙ₂ T kₙ)
 
 /-- Uₙᶜ indicator function: if kₙ ∉ Uₙ then 1 else 0 -/
-def Φc (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) (kₙ : ℕ → ι) : ℝ :=
+def Φₙc (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) (T : ℝ) (kₙ : ℕ → ι) : ℝ :=
 indicator (Uₙᶜ qₙ₁ qₙ₂ T) (λ kₙ, 1) kₙ
 
 /-- Prob. of error: guess qₙ₂ when actually qₙ₁ -/
