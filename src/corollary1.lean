@@ -17,20 +17,15 @@ variables {ι : Type} [fintype ι]
 [Tₙ = (err_exp qₙ₁ qₙ₁ r) - r] -- consider this partition
 
 theorem prob_αₙ_le (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ₁] [rnd_var qₙ₂] (r Tₙ : ℝ) :
-αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-err_exp qₙ₁ qₙ₂ r) := sorry
+αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-err_exp qₙ₁ qₙ₂ r) := sorry -- proof similar to theorem9α
 
 /-- Corollary 1 in Blahut1974 -/
 theorem prob_αₙ_le_of_iid :
 αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-(n * err_exp_1 q₁ q₂ (r/n))) :=
 begin
-  have h1 : αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-err_exp qₙ₁ qₙ₂ r), {
-    exact prob_αₙ_le qₙ₁ qₙ₂ r Tₙ,
-  },
-  have h2 : err_exp qₙ₁ qₙ₂ r = n * err_exp_1 q₁ q₂ (r/n), {
-    apply err_exp_of_iid qₙ₁ qₙ₂ q₁ q₂,
-    exact _inst_8, exact _inst_9,
-  },
-  rw h2 at h1, exact h1,
+  rw ← err_exp_of_iid qₙ₁ qₙ₂ q₁ q₂,
+  exact prob_αₙ_le qₙ₁ qₙ₂ r Tₙ,
+  exact _inst_8, exact _inst_9,
 end
 
 /-- Corollary 1 in Blahut1974 -/
