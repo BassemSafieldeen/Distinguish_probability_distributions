@@ -1,5 +1,4 @@
 import approach_n_symbols
-import theorem9αₙ
 
 open real
 
@@ -16,15 +15,5 @@ variables {ι : Type} [fintype ι]
 (r T Tₙ : ℝ)
 [Tₙ = (err_exp qₙ₁ qₙ₁ r) - r] -- consider this partition
 
-/-- Corollary 1 in Blahut1974 -/
-theorem prob_αₙ_le_of_iid :
-αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-(n * err_exp_1 q₁ q₂ (r/n))) :=
-begin
-  rw ← err_exp_of_iid qₙ₁ qₙ₂ q₁ q₂,
-  exact prob_αₙ_le qₙ₁ qₙ₂ r Tₙ,
-  exact _inst_8, exact _inst_9,
-end
-
-/-- Corollary 1 in Blahut1974 -/
-theorem prob_βₙ_le_of_iid :
-βₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-n*r) := sorry
+theorem prob_αₙ_le (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ₁] [rnd_var qₙ₂] (r Tₙ : ℝ) :
+αₙ qₙ₁ qₙ₂ Tₙ ≤ exp(-err_exp qₙ₁ qₙ₂ r) := sorry -- proof like theorem9α

@@ -28,7 +28,7 @@ variables {n : ℕ} {kₙ : ℕ → ι}
 {q : ι → ℝ} [rnd_var_1 q]
 
 lemma log_iid [H : iid n qₙ q] [H2: ∀ i ∈ range n, q (kₙ i) ≠ 0] :
-log(qₙ kₙ) = ∑ i in range n, log(q (kₙ i)) :=
+  log(qₙ kₙ) = ∑ i in range n, log(q (kₙ i)) :=
 begin
   calc log(qₙ kₙ) = log(∏ i in range n, q (kₙ i)) : by rw H
              ... = ∑ i in range n, log(q (kₙ i)) : log_prod _ _ H2,
@@ -44,7 +44,7 @@ variables
 
 lemma discrimination_additive_of_iid [iid n qₙ₁ q₁] [iid n qₙ₂ q₂]
 [H2: ∀ kₙ : (ℕ → ι), ∀ i ∈ range n, q₁ (kₙ i) ≠ 0] [H3: ∀ kₙ : (ℕ → ι), ∀ i ∈ range n, q₂ (kₙ i) ≠ 0] :
-discrimination qₙ₁ qₙ₂ = n * discrimination_1 q₁ q₂ :=
+  discrimination qₙ₁ qₙ₂ = n * discrimination_1 q₁ q₂ :=
 begin
   have log_diff : ∀ kₙ, log(qₙ₁ kₙ) - log(qₙ₂ kₙ) = (∑ i in range n, log(q₁ (kₙ i))) - (∑ i in range n, log(q₂ (kₙ i))), {
     intro kₙ, rw [log_iid qₙ₁, log_iid qₙ₂], exact _inst_9, exact _inst_11, exact H3 kₙ, exact _inst_8, exact _inst_10, exact H2 kₙ,
@@ -68,11 +68,13 @@ def achieves_err_exp (qₙ qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ
 discrimination qₙ₁ qₙ ≤ ε
 → discrimination qₙ qₙ₂ ≥ δ
 
+/-- Thm. 8 in Blahut1974 -/
 lemma err_exp_of_iid {ε} [iid n qₙ₁ q₁] [iid n qₙ₂ q₂] :
-err_exp qₙ₁ qₙ₂ ε = n * err_exp_1 q₁ q₂ (ε/n) :=
+  err_exp qₙ₁ qₙ₂ ε = n * err_exp_1 q₁ q₂ (ε/n) :=
 begin
   calc err_exp qₙ₁ qₙ₂ ε = Inf { b : ℝ | ∃ qₙ, b = discrimination qₙ qₙ₂ ∧ discrimination qₙ₁ qₙ ≤ ε } : by rw err_exp
             ... = Inf { b : ℝ | ∃ q, b = n * discrimination_1 q q₂ ∧ (n:ℝ) * discrimination_1 q₁ q ≤ ε } : by sorry -- rw discrimination_additive_of_iid
+            ... = Inf { b : ℝ | ∃ q, b = n * discrimination_1 q q₂ ∧ discrimination_1 q₁ q ≤ ε/n } : sorry -- simp
             ... = n * Inf { b : ℝ | ∃ q, b = discrimination_1 q q₂ ∧ discrimination_1 q₁ q ≤ ε/n } : by sorry -- simp
             ... = n * err_exp_1 q₁ q₂ (ε/n) : by rw err_exp_1,
 end
