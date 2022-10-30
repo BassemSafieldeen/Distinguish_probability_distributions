@@ -12,7 +12,7 @@ variables {ι : Type} [fintype ι] [decidable_eq ι]
 
 /-- prob of symbol -/
 class rnd_var_1 (q : ι → ℝ) :=
-(probs_nonneg  : ∀ k, q k ≥ 0)
+(probs_pos  : ∀ k, q k > 0) -- "we will assume for later convenience strictly positive components"
 (sum_probs_one : ∑ k, q k = 1)
 
 /-- relative entropy -/

@@ -4,7 +4,7 @@ import analysis.special_functions.complex.log
 
 import rnd_var_one_symbol
 
-open real finset
+open real finset rnd_var_1
 
 open_locale big_operators
 
@@ -14,7 +14,7 @@ variables {ι : Type} [fintype ι] [decidable_eq ι] [fintype (ℕ → ι)]
 
 /-- prob of sequence of symbols -/
 class rnd_var (qₙ : (ℕ → ι) → ℝ) :=
-(probs_nonneg  : ∀ sₙ, qₙ sₙ ≥ 0)
+(probs_pos  : ∀ sₙ, qₙ sₙ > 0) -- "we will assume for later convenience strictly positive components"
 (sum_probs_one : ∑ sₙ, qₙ sₙ = 1)
 
 /- if we lift from ι to (ℕ → ι) then no need for redundant classes -/
@@ -27,11 +27,11 @@ variables {n : ℕ} {kₙ : ℕ → ι}
 (qₙ : (ℕ → ι) → ℝ) [rnd_var qₙ]
 {q : ι → ℝ} [rnd_var_1 q]
 
-lemma log_iid [H : iid n qₙ q] [H2: ∀ i ∈ range n, q (kₙ i) ≠ 0] :
+lemma log_iid [H : iid n qₙ q] :
   log(qₙ kₙ) = ∑ i in range n, log(q (kₙ i)) :=
 begin
   calc log(qₙ kₙ) = log(∏ i in range n, q (kₙ i)) : by rw H
-             ... = ∑ i in range n, log(q (kₙ i)) : log_prod _ _ H2,
+             ... = ∑ i in range n, log(q (kₙ i)) : by {rw log_prod, intros i hi, exact ne_of_gt (probs_pos (kₙ i))}
 end
 
 /-- relative entropy -/
@@ -42,12 +42,11 @@ variables
 (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ₁] [rnd_var qₙ₂]
 (q₁ q₂ : ι → ℝ) [rnd_var_1 q₁] [rnd_var_1 q₂]
 
-lemma discrimination_additive_of_iid [iid n qₙ₁ q₁] [iid n qₙ₂ q₂]
-[H2: ∀ kₙ : (ℕ → ι), ∀ i ∈ range n, q₁ (kₙ i) ≠ 0] [H3: ∀ kₙ : (ℕ → ι), ∀ i ∈ range n, q₂ (kₙ i) ≠ 0] :
+lemma discrimination_additive_of_iid [iid n qₙ₁ q₁] [iid n qₙ₂ q₂] :
   discrimination qₙ₁ qₙ₂ = n * discrimination_1 q₁ q₂ :=
 begin
   have log_diff : ∀ kₙ, log(qₙ₁ kₙ) - log(qₙ₂ kₙ) = (∑ i in range n, log(q₁ (kₙ i))) - (∑ i in range n, log(q₂ (kₙ i))), {
-    intro kₙ, rw [log_iid qₙ₁, log_iid qₙ₂], exact _inst_9, exact _inst_11, exact H3 kₙ, exact _inst_8, exact _inst_10, exact H2 kₙ,
+    intro kₙ, rw [log_iid qₙ₁, log_iid qₙ₂]; assumption,
   },
   have hg : ∀ i, ∑ kₙ, (qₙ₁ kₙ) * (log(q₁ (kₙ i)) - log(q₂ (kₙ i))) = discrimination_1 q₁ q₂, {
     sorry,
@@ -63,10 +62,10 @@ end
 def err_exp (qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ₁] [rnd_var qₙ₂] (ε : ℝ) :=
 Inf { b : ℝ | ∃ qₙ, b = discrimination qₙ qₙ₂ ∧ discrimination qₙ₁ qₙ ≤ ε }
 
-/-- can get δ-close to q₂ when ε-close to q₁ -/
-def achieves_err_exp (qₙ qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ] [rnd_var qₙ₁] [rnd_var qₙ₂] (ε δ : ℝ) :=
-discrimination qₙ₁ qₙ ≤ ε
-→ discrimination qₙ qₙ₂ ≥ δ
+/- can get δ-close to q₂ when ε-close to q₁ -/
+-- def achieves_err_exp (qₙ qₙ₁ qₙ₂ : (ℕ → ι) → ℝ) [rnd_var qₙ] [rnd_var qₙ₁] [rnd_var qₙ₂] (ε δ : ℝ) :=
+-- discrimination qₙ₁ qₙ ≤ ε
+-- → discrimination qₙ qₙ₂ ≥ δ
 
 /-- Thm. 8 in Blahut1974 -/
 lemma err_exp_of_iid {ε} [iid n qₙ₁ q₁] [iid n qₙ₂ q₂] :

@@ -1,5 +1,3 @@
-import algebra.indicator_function
-
 import util
 import rnd_var_one_symbol
 

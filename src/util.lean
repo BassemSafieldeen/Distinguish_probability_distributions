@@ -9,11 +9,11 @@ open real set
 open_locale big_operators
 
 lemma le_div_of_pos {a b c d : ℝ} :
-b * exp(d - c) ≤ a → 0 < b → exp(d - c) ≤ a / b :=
+  b * exp(d - c) ≤ a → 0 < b → exp(d - c) ≤ a / b :=
 λ H G, by {rw mul_comm at H, exact (le_div_iff G).mpr H}
 
 lemma exp_tmp_lemma {a b c d : ℝ} :
-a ≥ b * exp(d - c) → 0 < b → 1 ≤ a / b * exp(c - d) :=
+  a ≥ b * exp(d - c) → 0 < b → 1 ≤ a / b * exp(c - d) :=
 begin
   intros H G,
   have h3 : a/b ≥ exp(d - c) → a/b * exp(c - d) ≥ exp(d - c) * exp(c - d), {
@@ -31,11 +31,20 @@ begin
 end
 
 lemma a_le_c {b : ℝ → ℝ} {a c : ℝ} :
-(∀ s, a ≤ b s) → (∃ s, c = b s) → (a ≤ c) :=
+  (∀ s, a ≤ b s) → (∃ s, c = b s) → (a ≤ c) :=
 by finish
 
+lemma mul_add_ge_of_ge {a b c d : ℝ} :
+  a ≥ d → a * b + c ≥ d * b + c :=
+begin
+  intro H,
+  norm_num at *,
+  rw mul_le_mul_right, exact H,
+  sorry
+end
+
 lemma zero_le_div_exp_pow {a b c d : ℝ} :
-0 ≤ a → 0 ≤ b → 0 ≤ (a / b * exp(c))^d :=
+  0 ≤ a → 0 ≤ b → 0 ≤ (a / b * exp(c))^d :=
 begin
   intros ha hb,
   apply rpow_nonneg_of_nonneg,
@@ -51,36 +60,42 @@ def Φ {ι : Type} (S : set ι) (k : ι) : ℝ :=
 indicator S 1 k
 
 lemma indicator_zero_of_not_one {ι : Type} {S : set ι} {k} :
-¬ (Φ S k = 1) → (Φ S k = 0) :=
+  ¬ (Φ S k = 1) → (Φ S k = 0) :=
 λ H, by {rw [Φ, indicator] at *, by_contradiction H1, finish}
 
 variables {ι : Type} [fintype ι]
 
-/-- if A ⊂ B then ∑ k ∈ A, f k < ∑ k ∈ B, f k-/
-lemma sum_lt_of_subset {A B : set ι} {f : ι → ℝ} :
-A ⊂ B → ∑ k, f k * (Φ A k) ≤ ∑ k, f k * (Φ B k) :=
+/-- if A ⊆ B then ∑ k ∈ A, f k < ∑ k ∈ B, f k-/
+lemma sum_le_of_subset {A B : set ι} {f : ι → ℝ} :
+  A ⊆ B → ∑ k, f k * (Φ A k) ≤ ∑ k, f k * (Φ B k) :=
 sorry
 
 lemma add_ge_sum_union {A B : set ι} {f : ι → ℝ} :
-∑ k, f k * (Φ A k) + ∑ k, f k * (Φ B k) ≥ ∑ k, f k * (Φ (A∪B) k) :=
+  ∑ k, f k * (Φ A k) + ∑ k, f k * (Φ B k) ≥ ∑ k, f k * (Φ (A∪B) k) :=
 sorry
 
 lemma in_self_or_in_compl {ι : Type} [fintype ι] [decidable_eq ι] {q : ι → ℝ} [rnd_var_1 q] {S : set ι} :
-∑ k, q k * Φ S k = 1 - ∑ k, q k * Φ Sᶜ k := sorry
+  ∑ k, q k * Φ S k = 1 - ∑ k, q k * Φ Sᶜ k :=
+sorry
 
 lemma gt_compl_le {ι : Type} {f g : ι → ℝ} :
-{k | f k > g k}ᶜ = {k | f k ≤ g k} := sorry
+  {k | f k > g k}ᶜ = {k | f k ≤ g k} :=
+by {rw compl_def, simp}
+
+lemma subset_abs {ι : Type} {f : ι → ℝ} {a : ℝ} :
+  { k:ι | f k ≥ a } ⊆ { k:ι | abs(f k) ≥ a } :=
+sorry
 
 /--
 the smallest a equal to b. Multiplied by n.
 is the smallest number equal to n * b.
 -/
 lemma mul_inf_eq_inf_mul {a b n : ℝ} : 
-n * Inf { a | a = b } = Inf { a | a = n * b } :=
+  n * Inf { a | a = b } = Inf { a | a = n * b } :=
 sorry
 
 lemma mul_inf_eq_inf_mul_ex {ι : Type} [fintype ι] {a b n : ℝ} {f : ι → ℝ} : 
-n * Inf { a | a = b } = Inf { a | a = n * b } :=
+  n * Inf { a | a = b } = Inf { a | a = n * b } :=
 sorry
 
 variables [decidable_eq ι] 
@@ -95,7 +110,7 @@ def Var (q : ι → ℝ) [rnd_var_1 q] (f : ι → ℝ) :=
 
 /-- Pr(|f X - 𝔼[f X]| ≥ ε) ≤ Var(f X)/ε² -/
 theorem Chebyshevs_ineq {X : ι → ℝ} [rnd_var_1 X] {f : ι → ℝ} {ε : ℝ} :
-∑ k, X k * (Φ {k | abs(f k - μ X f) ≥ ε} k) ≤ Var X f/ε^2 :=
+  ∑ k, X k * (Φ {k | abs(f k - μ X f) ≥ ε} k) ≤ Var X f/ε^2 :=
 begin
   -- Pr(|f X - 𝔼[f X]| ≥ ε)
   -- = Pr(k ∈ {k | |f k - μ X f| ≥ ε})
