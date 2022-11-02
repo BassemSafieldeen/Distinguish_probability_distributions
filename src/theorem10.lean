@@ -48,18 +48,34 @@ lemma q_div_q₁_ne_zero {k} :
 by {apply ne_of_gt, rw [(lt_div_iff _), zero_mul]; simp}
 
 lemma in_U₂ :
-  (∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k)) * exp(-(r + ε)) < ∑ k, q₁ k * (Φ (U₂ q q₁ q₂ r ε) k) :=
-sorry
+  (∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k)) * exp(-(r + ε)) ≤ ∑ k, q₁ k * (Φ (U₂ q q₁ q₂ r ε) k) :=
+begin
+  rw finset.sum_mul,
+  apply finset.sum_le_sum,
+  intros k hk,
+  rw [Φ, indicator],
+  by_cases (k ∈ U₂ q q₁ q₂ r ε), simp only [h], simp,
+  rw U₂ at h, norm_num at h,
+  apply le_of_lt, rw add_comm, exact h.2,
+  simp only [h], simp,
+end
 
 lemma in_U₁ :
-(∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k)) * exp(-(err_exp_1 q₁ q₂ r + ε))
-                                   < ∑ k, (q₂ k) * (Φ (U₁ q q₁ q₂ r ε) k) :=
-sorry
-
-lemma in_U₁' :
 (∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k))
-                                   < (∑ k, (q₂ k) * (Φ (U₁ q q₁ q₂ r ε) k)) * exp(err_exp_1 q₁ q₂ r + ε) :=
-sorry
+                                   ≤ (∑ k, (q₂ k) * (Φ (U₁ q q₁ q₂ r ε) k)) * exp(err_exp_1 q₁ q₂ r + ε) :=
+begin
+  rw finset.sum_mul,
+  apply finset.sum_le_sum,
+  intros k hk,
+  rw [Φ, indicator],
+  by_cases (k ∈ U₁ q q₁ q₂ r ε), simp only [h], simp,
+  rw U₁ at h, norm_num at h,
+  apply le_of_lt,
+  rw ← mul_lt_mul_right (exp_pos (-err_exp_1 q₁ q₂ r - ε)),
+  rw mul_assoc, rw ← exp_add _ _, ring_nf, rw exp_zero, rw one_mul,
+  rw ← tactic.ring.add_neg_eq_sub, rw add_comm, rw mul_comm, exact h.2,
+  simp only [h], simp,
+end
 
 include HT
 
@@ -99,8 +115,7 @@ begin
         sorry,
       },
       {
-        rw [exp_add, ← lt_div_iff'] at H,
-        rw [← lt_div_iff', exp_neg r] at H,
+        rw [exp_add, ← lt_div_iff', ← lt_div_iff', exp_neg r] at H,
         rw div_inv_eq_mul at H,
         exact H.2, apply exp_pos, simp,
       },
@@ -128,10 +143,7 @@ begin
     },
     {
       have H1 : exp (-ε) < q₁ k / q k * exp r, by exact H.1,
-      rw exp_add,
-      rw ← lt_div_iff',
-      rw ← lt_div_iff',
-      rw exp_neg r,
+      rw [exp_add, ← lt_div_iff', ← lt_div_iff', exp_neg r],
       rwa div_inv_eq_mul, apply exp_pos, simp,
     },
   },
@@ -144,7 +156,7 @@ begin
   calc ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k) 
                   = 1 - ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε))ᶜ k) : by rw in_self_or_in_compl
               ... = 1 - ∑ k, q k * (Φ ((UA q q₁ q₂ r ε)ᶜ ∪ (UB q q₁ q₂ r ε)ᶜ) k) : by rw compl_inter
-              ... ≥ 1 - (∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) + ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k)) : by apply sub_le_sub_left add_ge_sum_union
+              ... ≥ 1 - (∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) + ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k)) : by {apply sub_le_sub_left, exact add_ge_sum_union q_pos}
               ... ≥ 1 - ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) - ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k) : by linarith,
 end
 
@@ -153,9 +165,9 @@ lemma log_lt_of_lt_div_mul {k} :
 begin
   intro H,
   rw [← exp_lt_exp, exp_log],
-  rw [← mul_lt_mul_left (exp_pos $ -ε), ← (exp_add _ _)],
+  rw [← mul_lt_mul_left (exp_pos _), ← (exp_add _ _)],
   rw [neg_add_self, exp_zero, ← mul_assoc],
-  rw ← mul_lt_mul_right (exp_pos $ r),
+  rw ← mul_lt_mul_right (exp_pos _),
   rw [mul_assoc, ← (exp_add _ _)],
   rw [neg_add_self, exp_zero, mul_one, one_mul, mul_div],
   rw div_lt_iff (q₁_pos k),
@@ -222,7 +234,7 @@ by {rw [UTA, UA_rw, gt_compl_le], apply subset_abs}
 
 lemma sum_UAc_le_sum_UTA :
   ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) ≤ ∑ k, q k * (Φ (UTA q q₁ q₂ r ε) k) :=
-sum_le_of_subset (UAc_subset_UTA)
+sum_le_of_subset q_pos (UAc_subset_UTA)
 
 variables {σ₁ σ₂ : ℝ}
 (Hσ₁ : σ₁ = Var q (λk, log(q k / q₁ k)))
@@ -246,7 +258,7 @@ by {rw [UTB, UB_rw, gt_compl_le], apply subset_abs}
 
 lemma sum_UBc_le_sum_UTB :
   ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k) ≤ ∑ k, q k * (Φ (UTB q q₁ q₂ r ε) k) :=
-sum_le_of_subset (UBc_subset_UTB)
+sum_le_of_subset q_pos (UBc_subset_UTB)
 
 include Hσ₂ Herr_exp
 
@@ -279,7 +291,7 @@ begin
   intro H,
   calc ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) + γ
             ≥ ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) + ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) : by apply add_le_add_left H
-        ... ≥ ∑ k, q k * (Φ ((U₂ q q₁ q₂ r ε) ∪ (U₁ q q₁ q₂ r ε)) k) : add_ge_sum_union
+        ... ≥ ∑ k, q k * (Φ ((U₂ q q₁ q₂ r ε) ∪ (U₁ q q₁ q₂ r ε)) k) : add_ge_sum_union q_pos
         ... = ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k) : by rw [union_comm, U₁_union_U₂_eq_UA_inter_UB]
         ... ≥ 1 - (σ₁ + σ₂)/ε^2 : sum_UA_inter_UB_ge Hr Herr_exp Hσ₁ Hσ₂,
 end
@@ -289,33 +301,34 @@ include HT
 /-- Thm. 10 in Blahut1974 -/
 theorem prob_of_α_error_ge {ε > 0} {γ > 0} : 
   β q₁ q₂ T ≤ γ * exp(-(r + ε))
-  → α q₁ q₂ T > exp(-(err_exp_1 q₁ q₂ r + ε)) * (1 - (σ₁ + σ₂)/(ε^2) - γ) :=
+  → α q₁ q₂ T ≥ exp(-(err_exp_1 q₁ q₂ r + ε)) * (1 - (σ₁ + σ₂)/(ε^2) - γ) :=
 begin
   intros Hβ,
-  have Hγ : (∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k)) * exp(-(r + ε)) < γ * exp(-(r + ε)), {
+  have Hγ : (∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k)) * exp(-(r + ε)) ≤ γ * exp(-(r + ε)), {
     calc (∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k)) * exp(-(r + ε)) 
-                < ∑ k, q₁ k * (Φ (U₂ q q₁ q₂ r ε) k) : in_U₂
-            ... ≤ ∑ k, q₁ k * (Φ (U q₁ q₂ T)ᶜ k) : sum_le_of_subset (U₂_subset_Uc HT)
+                ≤ ∑ k, q₁ k * (Φ (U₂ q q₁ q₂ r ε) k) : in_U₂
+            ... ≤ ∑ k, q₁ k * (Φ (U q₁ q₂ T)ᶜ k) : sum_le_of_subset q₁_pos (U₂_subset_Uc HT)
             ... = β q₁ q₂ T : by rw β
             ... ≤ γ * exp(-(r + ε)) : by assumption,
   },
-  have γ_gt : ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) < γ, {
-    exact (mul_lt_mul_right (exp_pos (-(r + ε)))).mp Hγ,
+  have γ_gt : ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) ≤ γ, {
+    exact (mul_le_mul_right (exp_pos (-(r + ε)))).mp Hγ,
   },
-  have : α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) + γ > 1 - (σ₁ + σ₂)/ε^2, {
+  have : α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) + γ ≥ 1 - (σ₁ + σ₂)/ε^2, {
     calc α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) + γ
                = (∑ k, q₂ k * (Φ (U q₁ q₂ T) k)) * exp(err_exp_1 q₁ q₂ r + ε) + γ : by rw α
-           ... ≥ (∑ k, q₂ k * (Φ (U₁ q q₁ q₂ r ε) k)) * exp(err_exp_1 q₁ q₂ r + ε) + γ : mul_add_ge_of_ge (sum_le_of_subset (U₁_subset_U HT))
-           ... > ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) + γ : by apply add_lt_add_right in_U₁'
-           ... > ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) + ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) : by apply add_lt_add_left γ_gt
-           ... ≥ ∑ k, q k * (Φ ((U₁ q q₁ q₂ r ε) ∪ (U₂ q q₁ q₂ r ε)) k) : add_ge_sum_union
+           ... ≥ (∑ k, q₂ k * (Φ (U₁ q q₁ q₂ r ε) k)) * exp(err_exp_1 q₁ q₂ r + ε) + γ : mul_add_ge_of_ge (exp_pos _) (sum_le_of_subset q₂_pos (U₁_subset_U HT))
+           ... ≥ ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) + γ : by apply add_le_add_right in_U₁
+           ... ≥ ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) + ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) : by apply add_le_add_left γ_gt
+           ... ≥ ∑ k, q k * (Φ ((U₁ q q₁ q₂ r ε) ∪ (U₂ q q₁ q₂ r ε)) k) : add_ge_sum_union q_pos
            ... = ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k) : by rw U₁_union_U₂_eq_UA_inter_UB
            ... ≥ 1 - (σ₁ + σ₂)/(ε^2) : by apply sum_UA_inter_UB_ge Hr Herr_exp Hσ₁ Hσ₂,
   },
-  have : α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) > 1 - (σ₁ + σ₂)/ε^2 - γ, {
-    apply sub_lt_iff_lt_add.mpr this,
+  have : α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) ≥ 1 - (σ₁ + σ₂)/ε^2 - γ, {
+    apply sub_le_iff_le_add.mpr this,
   },
-  apply (mul_lt_mul_right (exp_pos((err_exp_1 q₁ q₂ r + ε)))).mp _,
+  apply (mul_le_mul_right (exp_pos((err_exp_1 q₁ q₂ r + ε)))).mp _,
   rw [mul_comm, ← mul_assoc, ← exp_add _ _, neg_add, ← add_assoc],
-  simp, exact this,
+  rw [add_assoc, add_assoc, add_comm, add_comm (-err_exp_1 q₁ q₂ r) (-ε), ← add_assoc],
+  rw [add_neg_self, zero_add, add_comm, add_neg_self, exp_zero, one_mul], exact this,
 end

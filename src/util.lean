@@ -4,7 +4,7 @@ import analysis.special_functions.complex.log
 
 import rnd_var_one_symbol
 
-open real set
+open real set finset
 
 open_locale big_operators
 
@@ -20,13 +20,10 @@ begin
     intro H, apply mul_le_mul_of_nonneg_right, exact H, apply le_of_lt, exact exp_pos (c - d),
   },
   have h4 : a/b * exp(c - d) ≥ exp(d - c) * exp(c - d) → a/b * exp(c - d) ≥ 1, {
-    intro H,
-    rw ← exp_add (d-c) (c-d) at H,
-    norm_num at H,
-    exact H,
+    intro H, rw ← exp_add (d-c) (c-d) at H,
+    norm_num at H, exact H,
   },
-  apply h4,
-  apply h3,
+  apply h4, apply h3,
   exact le_div_of_pos H G,
 end
 
@@ -35,12 +32,11 @@ lemma a_le_c {b : ℝ → ℝ} {a c : ℝ} :
 by finish
 
 lemma mul_add_ge_of_ge {a b c d : ℝ} :
-  a ≥ d → a * b + c ≥ d * b + c :=
+  b > 0 → a ≥ d → a * b + c ≥ d * b + c :=
 begin
-  intro H,
+  intros G H,
   norm_num at *,
-  rw mul_le_mul_right, exact H,
-  sorry
+  rw mul_le_mul_right, exact H, exact G,
 end
 
 lemma zero_le_div_exp_pow {a b c d : ℝ} :
@@ -66,17 +62,43 @@ lemma indicator_zero_of_not_one {ι : Type} {S : set ι} {k} :
 variables {ι : Type} [fintype ι]
 
 /-- if A ⊆ B then ∑ k ∈ A, f k < ∑ k ∈ B, f k-/
-lemma sum_le_of_subset {A B : set ι} {f : ι → ℝ} :
+lemma sum_le_of_subset {A B : set ι} {f : ι → ℝ} (f_pos : ∀ k, 0 < f k) :
   A ⊆ B → ∑ k, f k * (Φ A k) ≤ ∑ k, f k * (Φ B k) :=
-sorry
+begin
+  intro H,
+  have h_indicator : ∀ k, Φ A k ≤ Φ B k, {
+    apply indicator_le_indicator_of_subset H, simp,
+  },
+  apply sum_le_sum,
+  intros k hk,
+  exact (mul_le_mul_left (f_pos k)).mpr (h_indicator k),
+end
 
-lemma add_ge_sum_union {A B : set ι} {f : ι → ℝ} :
-  ∑ k, f k * (Φ A k) + ∑ k, f k * (Φ B k) ≥ ∑ k, f k * (Φ (A∪B) k) :=
-sorry
+lemma add_ge_sum_union {A B : set ι} {f : ι → ℝ} (f_pos : ∀ k, 0 < f k) :
+  ∑ k, f k * (Φ (A∪B) k) ≤ ∑ k, f k * (Φ A k) + ∑ k, f k * (Φ B k) :=
+begin
+  rw ← sum_add_distrib,
+  apply sum_le_sum,
+  intros k hk,
+  rw [← mul_add, mul_le_mul_left],
+  swap,
+  exact (f_pos k),
+  sorry,
+end
 
 lemma in_self_or_in_compl {ι : Type} [fintype ι] [decidable_eq ι] {q : ι → ℝ} [rnd_var_1 q] {S : set ι} :
   ∑ k, q k * Φ S k = 1 - ∑ k, q k * Φ Sᶜ k :=
-sorry
+begin
+  rw [eq_sub_iff_add_eq, ← sum_add_distrib],
+  have hq : ∑ k, q k = 1, by exact rnd_var_1.sum_probs_one,
+  rw [← hq, sum_eq_sum_iff_of_le],
+  intros k hk,
+  rw [← mul_add, add_comm, Φ, Φ],
+  rw indicator_compl_add_self_apply S 1 k, simp,
+  intros k hk,
+  rw [← mul_add, add_comm, Φ, Φ],
+  rw indicator_compl_add_self_apply S 1 k, simp,
+end
 
 lemma gt_compl_le {ι : Type} {f g : ι → ℝ} :
   {k | f k > g k}ᶜ = {k | f k ≤ g k} :=
@@ -84,7 +106,7 @@ by {rw compl_def, simp}
 
 lemma subset_abs {ι : Type} {f : ι → ℝ} {a : ℝ} :
   { k:ι | f k ≥ a } ⊆ { k:ι | abs(f k) ≥ a } :=
-sorry
+by {norm_num, intros x hx, rw le_abs, left, exact hx}
 
 /--
 the smallest a equal to b. Multiplied by n.
