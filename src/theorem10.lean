@@ -102,50 +102,72 @@ omit HT
 lemma U₁_union_U₂_eq_UA_inter_UB :
   (U₁ q q₁ q₂ r ε) ∪ (U₂ q q₁ q₂ r ε) = (UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε) :=
 begin
-  rw [union_def, inter_def], ext k, split,
+  rw [union_def, inter_def], ext k,
+
+  let a : Prop := exp (-ε) < q₁ k / q k * exp r,
+  let b : Prop := exp (-ε) < q₂ k / q k * exp (err_exp_1 q₁ q₂ r),
+  let c : Prop :=  q₂ k / q k * exp(err_exp_1 q₁ q₂ r) ≤ q₁ k / q k * exp(r),
+
+  have a_def : a ↔ exp (-ε) < q₁ k / q k * exp r, refl,
+  have b_def : b ↔ exp (-ε) < q₂ k / q k * exp (err_exp_1 q₁ q₂ r), refl,
+  have c_def : c ↔ q₂ k / q k * exp(err_exp_1 q₁ q₂ r) ≤ q₁ k / q k * exp(r), refl,
+
+  have a_rw     : a ↔ q k * exp (-r + -ε) < q₁ k, {
+    rw ← mul_lt_mul_right (exp_pos(r)),
+    rw [mul_assoc, ← exp_add, add_comm, ← add_assoc, add_neg_self, zero_add],
+    have q_inv_pos : 0 < (q k)⁻¹, by exact inv_pos.mpr (q_pos k),
+    rw [← mul_lt_mul_right q_inv_pos, mul_assoc, mul_comm],
+    rw [← div_eq_mul_inv, div_mul, div_self, div_one],
+    rw [mul_assoc, mul_comm (exp (r)) (q k)⁻¹],
+    rw [← mul_assoc, ← div_eq_mul_inv],
+    exact ne_of_gt (q_pos k),
+  },
+  have b_rw     : b ↔ q k * exp (-ε + -err_exp_1 q₁ q₂ r) < q₂ k, {
+    rw ← mul_lt_mul_right (exp_pos(err_exp_1 q₁ q₂ r)),
+    rw [mul_assoc, ← exp_add, add_assoc, neg_add_self, add_zero],
+    have q_inv_pos : 0 < (q k)⁻¹, by exact inv_pos.mpr (q_pos k),
+    rw [← mul_lt_mul_right q_inv_pos, mul_assoc, mul_comm],
+    rw [← div_eq_mul_inv, div_mul, div_self, div_one],
+    rw [mul_assoc, mul_comm (exp (err_exp_1 q₁ q₂ r)) (q k)⁻¹],
+    rw [← mul_assoc, ← div_eq_mul_inv],
+    exact ne_of_gt (q_pos k),
+  },
+  have c_rw     : c ↔ q₂ k / q k * exp (err_exp_1 q₁ q₂ r - r) ≤ q₁ k / q k, {
+    rw ← mul_le_mul_right (exp_pos(r)),
+    rw [mul_assoc, ← exp_add], simp,
+  },
+  have not_c_rw : ¬ c ↔ q₁ k / q k < q₂ k / q k * exp (err_exp_1 q₁ q₂ r - r), by rw [c_rw, not_le],
+
+  have a_and_b_rw : (c ∧ b ∧ a) ∨ (¬ c ∧ b ∧ a) ↔ (a ∧ b), by {split, tauto, tauto},
+
+  have c_and_b_rw     :   c ∧ b ↔ c ∧ b ∧ a, {
+    rw [a_def, b_def, c_def],
+    split, intro H,
+    split, exact H.1, split, exact H.2,
+    calc exp(-ε) < q₂ k / q k * exp (err_exp_1 q₁ q₂ r) : H.2
+             ... ≤ q₁ k / q k * exp r : H.1,
+    intro H, exact ⟨H.1, H.2.1⟩,
+  },
+  have not_c_and_b_rw : ¬ c ∧ a ↔ ¬ c ∧ b ∧ a, {
+    rw [a_def, b_def, c_def, not_le],
+    split,
+    intro H, split, exact H.1, split,
+    calc exp (-ε) < q₁ k / q k * exp r : H.2
+              ... < q₂ k / q k * exp (err_exp_1 q₁ q₂ r) : H.1,
+    exact H.2,
+    intro H, exact ⟨H.1, H.2.2⟩,
+  },
+  split,
   {
     intro H, rw [U₁, U₂] at H, rw [UA, UB],
-    norm_num at *, split,
-    {
-      cases H,
-      {
-        have H1 : q₂ k / q k * exp (err_exp_1 q₁ q₂ r - r) ≤ q₁ k / q k, by exact H.1,
-        have H2 : q k * exp (-ε + -err_exp_1 q₁ q₂ r) < q₂ k, by exact H.2,
-        -- combine H1 and H2
-        sorry,
-      },
-      {
-        rw [exp_add, ← lt_div_iff', ← lt_div_iff', exp_neg r] at H,
-        rw div_inv_eq_mul at H,
-        exact H.2, apply exp_pos, simp,
-      },
-    },
-    {
-      cases H,
-      {
-        have H2 : q k * exp (-ε + -err_exp_1 q₁ q₂ r) < q₂ k, by exact H.2,
-        rw [exp_add, ← lt_div_iff'] at H2,
-        rw [mul_comm, ← lt_div_iff', exp_neg(err_exp_1 q₁ q₂ r)] at H2,
-        rwa div_inv_eq_mul at H2,
-        apply exp_pos, simp,
-      },
-      {
-        -- combine H1 and H2
-        sorry,
-      },
-    },
+    norm_num, norm_num at H,
+    rwa [← a_and_b_rw, ← c_and_b_rw, ← not_c_and_b_rw, not_c_rw, c_rw, a_rw, b_rw],
   },
   {
     intro H, rw [UA, UB] at H, rw [U₁, U₂],
-    norm_num at *, right, split,
-    {
-      sorry,
-    },
-    {
-      have H1 : exp (-ε) < q₁ k / q k * exp r, by exact H.1,
-      rw [exp_add, ← lt_div_iff', ← lt_div_iff', exp_neg r],
-      rwa div_inv_eq_mul, apply exp_pos, simp,
-    },
+    norm_num, norm_num at H,
+    rw [← b_rw, ← a_rw, ← c_rw, ← not_c_rw, c_and_b_rw, not_c_and_b_rw],
+    exact a_and_b_rw.mpr H,
   },
 end
 
