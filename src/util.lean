@@ -83,7 +83,23 @@ begin
   rw [← mul_add, mul_le_mul_left],
   swap,
   exact (f_pos k),
-  sorry,
+  rw Φ, rw Φ, rw Φ,
+  apply indicator_le',
+  intros a ha,
+  simp,
+  have : a ∈ A ∨ a ∈ B, by {apply ha,},
+  by_cases a ∈ A,
+  rw indicator, simp only [h], simp,
+  by_cases a ∈ B,
+  rw indicator, simp only [h], simp,
+  rw indicator, simp only [h], simp,
+  rw indicator, simp only [h], simp,
+  have : a ∈ B, by finish,
+  rw indicator, simp only [this], simp,
+  intros,
+  simp at H, rw or_iff_not_and_not at H, rw not_not at H,
+  rw indicator, simp only [H.1], simp,
+  rw indicator, simp only [H.2], simp,
 end
 
 lemma in_self_or_in_compl {ι : Type} [fintype ι] [decidable_eq ι] {q : ι → ℝ} [rnd_var_1 q] {S : set ι} :
@@ -108,17 +124,17 @@ lemma subset_abs {ι : Type} {f : ι → ℝ} {a : ℝ} :
   { k:ι | f k ≥ a } ⊆ { k:ι | abs(f k) ≥ a } :=
 by {norm_num, intros x hx, rw le_abs, left, exact hx}
 
-/--
+/-
 the smallest a equal to b. Multiplied by n.
 is the smallest number equal to n * b.
 -/
-lemma mul_inf_eq_inf_mul {a b n : ℝ} : 
-  n * Inf { a | a = b } = Inf { a | a = n * b } :=
-sorry
+-- lemma mul_inf_eq_inf_mul {a b n : ℝ} : 
+--   n * Inf { a | a = b } = Inf { a | a = n * b } :=
+-- by simp
 
-lemma mul_inf_eq_inf_mul_ex {ι : Type} [fintype ι] {a b n : ℝ} {f : ι → ℝ} : 
-  n * Inf { a | a = b } = Inf { a | a = n * b } :=
-sorry
+-- example {ι : Type} [fintype ι] {n : ℝ} {a c d : ℝ} {f : ι → ℝ} :
+--   Inf { b : ℝ | ∃ q, c = n * f q } = n * Inf { b : ℝ | ∃ q, c = f q } :=
+-- sorry
 
 variables [decidable_eq ι] 
 
