@@ -124,18 +124,6 @@ lemma subset_abs {ι : Type} {f : ι → ℝ} {a : ℝ} :
   { k:ι | f k ≥ a } ⊆ { k:ι | abs(f k) ≥ a } :=
 by {norm_num, intros x hx, rw le_abs, left, exact hx}
 
-/-
-the smallest a equal to b. Multiplied by n.
-is the smallest number equal to n * b.
--/
--- lemma mul_inf_eq_inf_mul {a b n : ℝ} : 
---   n * Inf { a | a = b } = Inf { a | a = n * b } :=
--- by simp
-
--- example {ι : Type} [fintype ι] {n : ℝ} {a c d : ℝ} {f : ι → ℝ} :
---   Inf { b : ℝ | ∃ q, c = n * f q } = n * Inf { b : ℝ | ∃ q, c = f q } :=
--- sorry
-
 variables [decidable_eq ι] 
 
 /-- expectation value of a function of a random variable -/
