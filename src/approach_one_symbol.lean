@@ -7,7 +7,7 @@ open_locale big_operators
 
 noncomputable theory
 
-variables {ι : Type} {n : ℕ} [fintype ι] [decidable_eq ι]
+variables {ι : Type} [fintype ι] [decidable_eq ι]
 
 def U (q₁ q₂ : ι → ℝ) (T : ℝ) :=
 { k | (q₁ k) ≥ (q₂ k) * exp T }
