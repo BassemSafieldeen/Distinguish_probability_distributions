@@ -126,7 +126,7 @@ by {norm_num, intros x hx, rw le_abs, left, exact hx}
 
 variables [decidable_eq ι] 
 
-/-- expectation value of a function of a random variable -/
+/-- expected value of a function of a random variable -/
 def μ (q : ι → ℝ) [rnd_var_1 q] (f : ι → ℝ) :=
 ∑ k, q k * f k
 
