@@ -35,6 +35,7 @@ variables
 {q q₁ q₂ : ι → ℝ} [rnd_var_1 q] [rnd_var_1 q₁] [rnd_var_1 q₂]
 {r T ε : ℝ} (HT : T = err_exp_1 q₁ q₂ r - r)
 (Hr : r = ∑ k, q k * log(q k / q₁ k)) -- let q achieve err_exp_1(r)
+(Hε : ε > 0)
 (Herr_exp : err_exp_1 q₁ q₂ r = ∑ k, q k * log(q k / q₂ k))
 
 @[simp] lemma exp_ne_zero : exp(r) ≠ 0 := ne_of_gt (exp_pos r)
@@ -262,17 +263,17 @@ variables {σ₁ σ₂ : ℝ}
 (Hσ₁ : σ₁ = Var q (λk, log(q k / q₁ k)))
 (Hσ₂ : σ₂ = Var q (λk, log(q k / q₂ k)))
 
-include Hσ₁ Hr
+include Hσ₁ Hr Hε
 
 lemma sum_UTA_le_var :
   ∑ k, q k * (Φ (UTA q q₁ q₂ r ε) k) ≤ σ₁/(ε^2) := 
-by {rw [UTA_rw Hr, Hσ₁], exact Chebyshevs_ineq}
+by {rw [UTA_rw Hr, Hσ₁], apply Chebyshevs_ineq, assumption}
 
 lemma sum_UAc_le_var :
   ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) ≤ σ₁/(ε^2) :=
-le_trans sum_UAc_le_sum_UTA (sum_UTA_le_var Hr Hσ₁)
+le_trans sum_UAc_le_sum_UTA (sum_UTA_le_var Hr Hε Hσ₁)
 
-omit Hr Hσ₁
+omit Hr Hε Hσ₁
 
 lemma UBc_subset_UTB :
   (UB q q₁ q₂ r ε)ᶜ ⊆ (UTB q q₁ q₂ r ε) :=
@@ -282,15 +283,15 @@ lemma sum_UBc_le_sum_UTB :
   ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k) ≤ ∑ k, q k * (Φ (UTB q q₁ q₂ r ε) k) :=
 sum_le_of_subset q_pos (UBc_subset_UTB)
 
-include Hσ₂ Herr_exp
+include Hσ₂ Herr_exp Hε
 
 lemma sum_UTB_le_var :
   ∑ k, q k * (Φ (UTB q q₁ q₂ r ε) k) ≤ σ₂/(ε^2) := 
-by {rw [UTB_rw, Hσ₂], exact Chebyshevs_ineq, exact Herr_exp}
+by {rw [UTB_rw, Hσ₂], apply Chebyshevs_ineq, assumption, exact Herr_exp}
 
 lemma sum_UBc_le_var  :
   ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k) ≤ σ₂/(ε^2) :=
-le_trans sum_UBc_le_sum_UTB (sum_UTB_le_var Herr_exp Hσ₂)
+le_trans sum_UBc_le_sum_UTB (sum_UTB_le_var Hε Herr_exp Hσ₂)
 
 include Hσ₁ Hr
 
@@ -299,9 +300,9 @@ lemma sum_UA_inter_UB_ge :
 begin
   calc ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k)
           ≥ 1 - ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) - ∑ k, q k * (Φ (UB q q₁ q₂ r ε)ᶜ k) : sum_inter_ge
-      ... ≥ 1 - ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) - σ₂/(ε^2) : by apply sub_le_sub_left (sum_UBc_le_var Herr_exp Hσ₂)
+      ... ≥ 1 - ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) - σ₂/(ε^2) : by apply sub_le_sub_left (sum_UBc_le_var Hε Herr_exp Hσ₂)
       ... ≥ 1 - σ₂/(ε^2) - ∑ k, q k * (Φ (UA q q₁ q₂ r ε)ᶜ k) : by linarith
-      ... ≥ 1 - σ₂/(ε^2) - σ₁/(ε^2) : by apply sub_le_sub_left (sum_UAc_le_var Hr Hσ₁)
+      ... ≥ 1 - σ₂/(ε^2) - σ₁/(ε^2) : by apply sub_le_sub_left (sum_UAc_le_var Hr Hε Hσ₁)
       ... ≥ 1 - (σ₁/(ε^2) + σ₂/(ε^2)) : by linarith
       ... = 1 - (σ₁ + σ₂)/ε^2 : by simp only [add_div],
 end
@@ -315,13 +316,13 @@ begin
             ≥ ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) + ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) : by apply add_le_add_left H
         ... ≥ ∑ k, q k * (Φ ((U₂ q q₁ q₂ r ε) ∪ (U₁ q q₁ q₂ r ε)) k) : add_ge_sum_union q_pos
         ... = ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k) : by rw [union_comm, U₁_union_U₂_eq_UA_inter_UB]
-        ... ≥ 1 - (σ₁ + σ₂)/ε^2 : sum_UA_inter_UB_ge Hr Herr_exp Hσ₁ Hσ₂,
+        ... ≥ 1 - (σ₁ + σ₂)/ε^2 : sum_UA_inter_UB_ge Hr Hε Herr_exp Hσ₁ Hσ₂,
 end
 
 include HT
 
 /-- Thm. 10 in Blahut1974 -/
-theorem prob_of_α_error_ge {ε > 0} {γ > 0} : 
+theorem prob_of_α_error_ge {γ > 0} : 
   β q₁ q₂ T ≤ γ * exp(-(r + ε))
   → α q₁ q₂ T ≥ exp(-(err_exp_1 q₁ q₂ r + ε)) * (1 - (σ₁ + σ₂)/(ε^2) - γ) :=
 begin
@@ -344,7 +345,7 @@ begin
            ... ≥ ∑ k, q k * (Φ (U₁ q q₁ q₂ r ε) k) + ∑ k, q k * (Φ (U₂ q q₁ q₂ r ε) k) : by apply add_le_add_left γ_gt
            ... ≥ ∑ k, q k * (Φ ((U₁ q q₁ q₂ r ε) ∪ (U₂ q q₁ q₂ r ε)) k) : add_ge_sum_union q_pos
            ... = ∑ k, q k * (Φ ((UA q q₁ q₂ r ε) ∩ (UB q q₁ q₂ r ε)) k) : by rw U₁_union_U₂_eq_UA_inter_UB
-           ... ≥ 1 - (σ₁ + σ₂)/(ε^2) : by apply sum_UA_inter_UB_ge Hr Herr_exp Hσ₁ Hσ₂,
+           ... ≥ 1 - (σ₁ + σ₂)/(ε^2) : by {apply sum_UA_inter_UB_ge; assumption},
   },
   have : α q₁ q₂ T * exp(err_exp_1 q₁ q₂ r + ε) ≥ 1 - (σ₁ + σ₂)/ε^2 - γ, {
     apply sub_le_iff_le_add.mpr this,
